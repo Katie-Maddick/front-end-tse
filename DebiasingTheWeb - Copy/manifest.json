@@ -13,7 +13,7 @@
 		{
 		"css": [ "popup.css" ],
 		"matches": ["<all_urls>"],
-		"js": [ "popup.js" ]
+		"js": [ "popup.js", "ExtractText.js" ]
 		}
 	]
 }

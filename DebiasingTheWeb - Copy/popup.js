@@ -1,32 +1,30 @@
-// contentScript.js
-
-function extractTextContent() {
-    const paragraphs = document.getElementsByTagName('p');
-    let textContent = '';
-
-    for (const paragraph of paragraphs) {
-      textContent += paragraph.textContent + ' ';
-    }
-
-    return textContent.trim();
-  }
-
-  const seedArticleText = extractTextContent();
-
-  // Store the seed text in Chrome Storage
-  chrome.storage.local.set({ seedArticleText });
-
-  // popup.js
-
-// Retrieve the seed text from Chrome Storage
-chrome.storage.local.get(['seedArticleText'], (data) => {
-    const seedArticleText = data.seedArticleText;
-
-    // Use the seed article text in your popup script
-    // For example, normalize the text and calculate the TF-IDF vector
-    //THIS IS FOR AFTER MERGING WITH THE BACK END const normalizedSeedArticle = normaliseText(seedArticleText);
-    //THIS IS FOR AFTER MERGING WITH THE BACK END const const seedTFIDF = calculateTFIDF(normalizedSeedArticle);
-
-    // ...
-  });
+//Reads in from a text file
+function readTextFile() {
+	document.getElementById('dataFile.txt') //Specifies document
+	.addEventListener('change', funtion () );
+    { 
+		let fr = new FileReader(); 
+		fr.onload = function () {
+			document.getElementByID("date") //Sets data as date
+			.textContent = fr.result; 
+		}
+		
+		fr.readAsBinaryString(this.files[0]);
+	}
 }
+
+//Doesn't seem to work but should
+function popup() {
+	chrome.tabs.query(
+		{active:true},
+		tabs=>{
+			const tab=tabs[0];
+			console.log("URL:", tab.url) //Displays 
+			let urlWeb = tab.url; //Gets separately
+		}
+		)
+}
+
+//Calls functions
+readTextFile();
+popup();
