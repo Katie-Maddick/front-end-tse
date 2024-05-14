@@ -1,19 +1,4 @@
-//Reads in from a text file
-function readTextFile() {
-	document.getElementById('dataFile.txt') //Specifies document
-	.addEventListener('change', funtion () );
-    { 
-		let fr = new FileReader(); 
-		fr.onload = function () {
-			document.getElementByID("date") //Sets data as date
-			.textContent = fr.result; 
-		}
-		
-		fr.readAsBinaryString(this.files[0]);
-	}
-}
-
-//Doesn't seem to work but should
+//Gets URL
 function popup() {
 	chrome.tabs.query(
 		{active:true},
@@ -26,5 +11,4 @@ function popup() {
 }
 
 //Calls functions
-readTextFile();
 popup();
