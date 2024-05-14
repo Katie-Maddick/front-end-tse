@@ -1,6 +1,6 @@
 {
     "name": "Debiasing The Web",
-    "version": "1.0.1",
+    "version": "1.1.0",
     "description": "Presents similar News Sources",
     "manifest_version": 3,
     "author": "Katie Maddick",
@@ -8,6 +8,9 @@
     "action":{
         "default_popup": "popup.html",
         "default_title": "Debiasing The Web"
+    },
+    "background": {
+        "service_worker": "background.js"
     },
 	"content_scripts": [ 
 		{

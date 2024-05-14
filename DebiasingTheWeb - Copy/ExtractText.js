@@ -8,7 +8,10 @@ function extractTextContent() {
       textContent += paragraph.textContent + ' ';
     }
 
-    return textContent.trim();
+    textContent = textContent.trim();
+
+    //Send a message to the background script with the extracted text
+    chrome.runtime.sendMessage({ type: 'extractText', text: textContent });
   }
 
   const seedArticleText = extractTextContent();
@@ -28,4 +31,6 @@ chrome.storage.local.get(['seedArticleText'], (data) => {
     //THIS IS FOR AFTER MERGING WITH THE BACK END const const seedTFIDF = calculateTFIDF(normalizedSeedArticle);
 
     // ...
-});
+})
+
+extractTextContent();
