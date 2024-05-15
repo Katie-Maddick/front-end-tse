@@ -3,34 +3,26 @@
 function extractTextContent() {
     const paragraphs = document.getElementsByTagName('p');
     let textContent = '';
-
+  
     for (const paragraph of paragraphs) {
       textContent += paragraph.textContent + ' ';
     }
-
-    textContent = textContent.trim();
-
-    //Send a message to the background script with the extracted text
-    chrome.runtime.sendMessage({ type: 'extractText', text: textContent });
+  
+    return textContent.trim();
   }
-
+  
   const seedArticleText = extractTextContent();
-
-  // Store the seed text in Chrome Storage
-  chrome.storage.local.set({ seedArticleText });
-
-  // popup.js
-
-// Retrieve the seed text from Chrome Storage
-chrome.storage.local.get(['seedArticleText'], (data) => {
-    const seedArticleText = data.seedArticleText;
-
-    // Use the seed article text in your popup script
-    // For example, normalize the text and calculate the TF-IDF vector
-    //THIS IS FOR AFTER MERGING WITH THE BACK END const normalizedSeedArticle = normaliseText(seedArticleText);
-    //THIS IS FOR AFTER MERGING WITH THE BACK END const const seedTFIDF = calculateTFIDF(normalizedSeedArticle);
-
-    // ...
-})
-
-extractTextContent();
+  console.log('Sending request to local server at http://localhost:3000/processSeedArticle'); 
+  fetch('http://localhost:3000/processSeedArticle', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ seedArticleText })
+  })
+    .then(response => response.json())
+    .then(data => {
+      console.log('Suggested articles:', data.suggestedArticles);
+      chrome.storage.local.set({ suggestedArticles: data.suggestedArticles });
+    })
+    .catch(error => console.error('Error:', error));
