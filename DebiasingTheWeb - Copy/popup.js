@@ -4,7 +4,7 @@ function popup() {
 		{active:true},
 		tabs=>{
 			const tab=tabs[0];
-			console.log("URL:", tab.url) //Displays 
+			console.log("URL: ", tab.url) //Displays 
 			let urlWeb = tab.url; //Gets separately
 		}
 	)
@@ -17,9 +17,8 @@ function popup() {
 			const table = document.querySelector('table tbody');
 			suggestedArticles.forEach((article, index) => {
 				const row = table.rows[index];
-				row.cells[0].textContent = article.title;
-				row.cells[1] = article.sentiment;
-				row.cells[2].innerHTML = <a href="$(article.url)" target="_blank">${article.url}</a>;
+				row.cells[0] = article.sentiment;
+				row.cells[1].innerHTML = <a href="$(article.url)" target="_blank">${article.url}</a>;
 			})
 		}
 	})

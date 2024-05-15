@@ -1,7 +1,7 @@
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.type === 'extractText') {
     //Send a POST request to your server with the extract text
-        fetch('http://...', {
+        fetch('http://your-server-url/process-text', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
