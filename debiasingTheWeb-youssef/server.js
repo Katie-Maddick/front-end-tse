@@ -3,11 +3,15 @@ const puppeteer = require('puppeteer');
 const natural = require('natural');
 const nlp = require('compromise');
 const bodyParser = require('body-parser');
-const cors = require('cors')
 
 const app = express();
-app.use(cors())
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'chrome-extension://oofbhkdhcdeklnbjndbmpdnpimikbmdj');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  next();
+});
 
 // Configuration for Google search API
 const GOOGLE_API_KEY = 'AIzaSyBgwzoNbaAePUngsVKmoDhYeqhqgNtpnOA'; // Replace with your API key
@@ -95,47 +99,71 @@ async function searchGoogle(query) {
   return data.items ? data.items.map(item => item.link) : [];
 }
 
-// Endpoint to process seed article and get suggestions
 app.post('/api', async (req, res) => {
   console.log('Received request:', req.body);
-  const domain = req.body.domain;
+  const url = req.body.url;
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
+  const seedArticle = url;
+  try {
+    await page.goto(seedArticle);
 
-  // ...
+    //Seed article contents
+    seedTitle = await page.evaluate(() => document.querySelector('h1').innerText);
+    seedText = await page.evaluate(() => document.querySelector('article').innerText);
+  } catch (error) {
+    console.error(`Failed to navigate to ${seedArticle}}`);
+    process.exit();
+  }
+  //Normalise seed article
+  const normalisedSeedArticle = normaliseText(seedText);
 
-  const articleURLs = await searchGoogle(extractedTitle);
+  //Calculate seed tf and sentiment
+  const seedTFIDF = calculateTFIDF(normalisedSeedArticle);
+  const seedArticleSentiment = sentimentAnalysis(normalisedSeedArticle); //calculate sentiment of seed article
+
+  const extractedTitle = extractKeywords(seedTitle);
+  const articleURLs = await searchGoogle(extractedTitle + 'news article');
   let suggestedArticles = [];
 
   // Use Promise.all() to wait for all asynchronous operations to complete
-  try {
-    const promises = articleURLs.map(async (url) => {
-      try {
-        await page.goto(url);
-        const articleData = await page.evaluate(() => {
-          const text = Array.from(document.querySelectorAll('article p')).map(p => p.innerText).join('\n');
-          return text;
-        });
-
-        // ...
-
-        if (totalScore > 0 && articleSentiment !== seedArticleSentiment) {
-          suggestedArticles.push({
-            url: url,
-            tfidfScore: totalScore,
-            sentiment: articleSentiment
+  for (let url of articleURLs) {
+    try {
+      const promises = articleURLs.map(async (url) => {
+        try {
+          await page.goto(url);
+          const articleData = await page.evaluate(() => {
+            const text = Array.from(document.querySelectorAll('article p')).map(p => p.innerText).join('\n');
+            return text;
           });
+
+          //Normalise scraped articles
+          let normalisedarticle = normaliseText(articleData);
+
+          //Calculate articles tf-idf and sentiment
+          let articleTFIDFVector = applyTFIDFTransformation(seedTFIDF, normalisedarticle);
+          let totalScore = calculateTotalScore(articleTFIDFVector);
+          let articleSentiment = sentimentAnalysis(normalisedarticle);
+
+          console.log(`Total score for URL ${url}:`, totalScore, "Sentiment:", articleSentiment);
+
+          if (totalScore > 0 && articleSentiment !== seedArticleSentiment) {
+            suggestedArticles.push({
+              url: url,
+              tfidfScore: totalScore,
+              sentiment: articleSentiment
+            });
+          }
+        } catch (error) {
+          console.error(`Failed to navigate to ${url}`);
         }
-      } catch (error) {
-        console.error(`Failed to navigate to ${url}`);
-      }
-    });
+      });
 
-    await Promise.all(promises);
-  } finally {
-    await browser.close();
+      await Promise.all(promises);
+    } finally {
+      await browser.close();
+    }
   }
-
   res.json({ suggestedArticles });
 });
 
@@ -143,3 +171,4 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
