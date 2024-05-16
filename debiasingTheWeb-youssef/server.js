@@ -3,8 +3,10 @@ const puppeteer = require('puppeteer');
 const natural = require('natural');
 const nlp = require('compromise');
 const bodyParser = require('body-parser');
+const cors = require('cors')
 
 const app = express();
+app.use(cors())
 app.use(bodyParser.json());
 
 // Configuration for Google search API
@@ -102,7 +104,7 @@ app.post('/api', async (req, res) => {
 
   // ...
 
-  const articleURLs = await searchGoogle(extractedTitle + ' news article');
+  const articleURLs = await searchGoogle(extractedTitle);
   let suggestedArticles = [];
 
   // Use Promise.all() to wait for all asynchronous operations to complete

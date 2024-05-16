@@ -1,14 +1,13 @@
-console.log('Registering onClicked event listener...');
-chrome.action.onClicked.addListener((tab) => {
+// Listen for tab updates
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  // Check if the URL has changed and the tab is active
+  if (changeInfo.url && tab.active) {
+    console.log('Tab URL changed:', tab.url);
 
-    console.log('Extension icon clicked');
-  
+    // Send a fetch request to the backend with the domain of the current tab
     const url = new URL(tab.url);
     const domain = url.hostname;
-    console.log(domain);
-  
-    console.log('Sending request to the server...');
-  
+
     fetch('http://localhost:3000/api', {
       method: 'POST',
       headers: {
@@ -18,10 +17,9 @@ chrome.action.onClicked.addListener((tab) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log('Received response from the server:', data);
+        console.log('Fetch request response:', data);
         // ... rest of the code
       })
       .catch((error) => console.error('Error:', error));
-  
-    console.log('Request sent to the server.');
-  });
+  }
+});

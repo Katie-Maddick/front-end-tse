@@ -2,6 +2,7 @@
   "dependencies": {
     "body-parser": "^1.20.2",
     "compromise": "^14.13.0",
+    "cors": "^2.8.5",
     "express": "^4.19.2",
     "natural": "^7.0.5",
     "node-fetch": "^3.3.2",
